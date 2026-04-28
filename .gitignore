@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.Python
+.venv/
+venv/
+env/
+
+# Env
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# uv
+.uv/
+
+# Project specific
+chroma_db/
+.DS_Store
