@@ -90,7 +90,7 @@ def _optimize_one(article: Article) -> Article:
             body = article.body_md
             meta = {}
 
-        # Per il check usiamo il body completo (con/senza front-matter è simile)
+        article.body_md = body  # strip front-matter per misurare solo il body
         report = _build_report(article, meta)
         if report.passed:
             article.seo = report

@@ -18,4 +18,5 @@ env/
 
 # Project specific
 chroma_db/
+published_summary.txt
 .DS_Store
