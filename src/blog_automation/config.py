@@ -19,17 +19,23 @@ CHROMA_DIR = PROJECT_ROOT / "chroma_db"
 
 # API
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_GEN_MODEL = "gemini-2.5-flash"
+GEMINI_GEN_MODEL = "gemini-3.1-flash-lite-preview"
 GEMINI_EMBED_MODEL = "gemini-embedding-001"
 EMBED_DIM = 768
 
 # Pipeline
 ARTICLES_PER_DAY = 3
 RSS_FEEDS = [
-    ("Il Sole 24 Ore - Finanza", "https://www.ilsole24ore.com/rss/finanza--mercati.xml"),
+    ("Il Sole 24 Ore - Finanza Business", "https://www.ilsole24ore.com/rss/finanza--business.xml"),
+    ("Il Sole 24 Ore - FinTech e Startup", "https://www.ilsole24ore.com/rss/finanza--fintech-e-startup.xml"),
+    ("Il Sole 24 Ore - Finanza", "https://www.ilsole24ore.com/rss/finanza.xml"),
+    ("Il Sole 24 Ore - Finanza Personale", "https://www.ilsole24ore.com/rss/finanza-personale.xml"),
+    ("Il Sole 24 Ore - Investimenti", "https://www.ilsole24ore.com/rss/finanza-personale--investimenti.xml"),
+    ("Il Sole 24 Ore - Risparmi e Consumi", "https://www.ilsole24ore.com/rss/finanza-personale--risparmi-e-consumi.xml"),
+    ("Il Sole 24 Ore - Educazione Finanziaria", "https://www.ilsole24ore.com/rss/finanza-personale--educazione-finanziaria.xml"),
     ("ANSA Economia", "https://www.ansa.it/sito/notizie/economia/economia_rss.xml"),
     ("Repubblica Economia", "https://www.repubblica.it/rss/economia/rss2.0.xml"),
-    ("Corriere Economia", "https://xml2.corriereobjects.it/rss/economia.xml"),
+    ("Repubblica Tecnologia", "https://www.repubblica.it/rss/tecnologia/rss2.0.xml"),
 ]
 
 # Filtri topic FinTech rilevanti
@@ -52,7 +58,7 @@ TITLE_MAX_LEN = 60
 META_DESC_MIN_LEN = 140
 META_DESC_MAX_LEN = 160
 ARTICLE_MIN_WORDS = 500
-ARTICLE_MAX_WORDS = 1200
+ARTICLE_MAX_WORDS = 700
 GULPEASE_MIN = 60
 SEO_MAX_ITERATIONS = 3
 

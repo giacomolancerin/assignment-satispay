@@ -20,7 +20,7 @@ Regole di stile:
 - Tono chiaro, diretto, senza gergo eccessivo
 - Esempi concreti (es. "se hai 5.000€ fermi sul conto...")
 - Struttura: H1 (titolo), introduzione 2-3 paragrafi, 2-4 sezioni H2, conclusione
-- Lunghezza: 600-900 parole
+- Lunghezza: 500-700 parole
 - NIENTE frasi tipo "in questo articolo esploreremo" — vai dritto al punto
 - NIENTE pubblicità diretta a Satispay; l'angolatura è naturale ("una carta digitale", "un'app di pagamenti")
 
@@ -33,7 +33,7 @@ Sintesi della fonte: {summary}
 URL fonte: {url}
 Categoria: {category}
 
-Genera un articolo da blog (600-900 parole) in markdown con front-matter:
+Genera un articolo da blog (500-700 parole) in markdown con front-matter:
 
 ```yaml
 ---

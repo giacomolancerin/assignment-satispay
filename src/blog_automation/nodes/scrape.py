@@ -7,7 +7,12 @@ from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 
 import feedparser
+import requests
 import trafilatura
+
+_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+}
 
 from .. import config
 from ..state import PipelineState, ScrapedItem
@@ -86,7 +91,9 @@ def scrape_node(state: PipelineState) -> PipelineState:
     for source_name, url in config.RSS_FEEDS:
         try:
             print(f"[scrape] feed: {source_name}")
-            parsed = feedparser.parse(url)
+            resp = requests.get(url, headers=_HEADERS, timeout=15)
+            resp.raise_for_status()
+            parsed = feedparser.parse(resp.content)
             for entry in parsed.entries:
                 if not _is_recent(entry):
                     continue
