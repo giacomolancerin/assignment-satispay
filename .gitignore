@@ -16,6 +16,11 @@ env/
 # uv
 .uv/
 
+# Node.js
+node_modules/
+.next/
+out/
+
 # Project specific
 chroma_db/
 published_summary.txt
