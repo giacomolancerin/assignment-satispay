@@ -10,11 +10,11 @@
   --border: #e5e5e5;
   --bg: #fef6de;
   --white: #ffffff;
-  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
-  --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.07);
+  --shadow-card: 0 6px 28px rgba(255, 71, 20, 0.08);
   --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.2);
   --max-w: 1240px;
 }
@@ -36,6 +36,7 @@ html {
 
 body {
   font-family: var(--font);
+  font-optical-sizing: auto;
   background: var(--bg);
   color: var(--dark);
   line-height: 1.6;
@@ -49,6 +50,7 @@ a {
 
 button {
   font-family: var(--font);
+  font-optical-sizing: auto;
   cursor: pointer;
 }
 
@@ -61,6 +63,7 @@ button {
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 1px 0 var(--border), 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .header-inner {
@@ -106,19 +109,21 @@ button {
    NAV LINK
 =========================== */
 .nav-link {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
   color: var(--text);
   padding: 8px 18px;
   border: 1.5px solid var(--border);
   border-radius: 100px;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
   white-space: nowrap;
 }
 
 .nav-link:hover {
   border-color: var(--red);
   color: var(--red);
+  background: rgba(255, 71, 20, 0.04);
 }
 
 /* ===========================
@@ -132,33 +137,46 @@ button {
 .hero-inner {
   max-width: var(--max-w);
   margin: 0 auto;
-  padding: 64px 28px 52px;
+  padding: 72px 28px 56px;
 }
 
 .hero-eyebrow {
-  display: inline-block;
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
   color: var(--red);
-  margin-bottom: 14px;
+  margin-bottom: 20px;
+}
+
+.hero-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 2px;
+  background: var(--red);
+  border-radius: 2px;
+  flex-shrink: 0;
 }
 
 .hero-title {
-  font-size: 56px;
-  font-weight: 800;
-  letter-spacing: -2px;
-  line-height: 1.05;
+  font-size: 68px;
+  font-weight: 700;
+  letter-spacing: -2.5px;
+  line-height: 1.02;
   color: var(--dark);
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .hero-sub {
   font-size: 18px;
+  font-weight: 400;
   color: var(--muted);
-  max-width: 520px;
-  line-height: 1.6;
+  max-width: 500px;
+  line-height: 1.65;
 }
 
 /* ===========================
@@ -188,15 +206,15 @@ button {
    ARTICLE CARD
 =========================== */
 .card {
-  background: var(--bg);
-  border: 1.5px solid var(--red);
+  background: var(--white);
+  border: 1.5px solid rgba(255, 71, 20, 0.14);
   border-radius: var(--radius-lg);
   padding: 28px;
   display: flex;
   flex-direction: column;
   gap: 14px;
   cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+  transition: box-shadow 0.22s, transform 0.22s, border-color 0.22s;
   position: relative;
 }
 
@@ -210,13 +228,13 @@ button {
   background: var(--red);
   border-radius: 0 0 3px 3px;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.22s;
 }
 
 .card:hover {
   box-shadow: var(--shadow-card);
-  transform: translateY(-3px);
-  border-color: rgba(239, 51, 64, 0.15);
+  transform: translateY(-4px);
+  border-color: var(--red);
 }
 
 .card:hover::before {
@@ -239,7 +257,7 @@ button {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.2px;
+  letter-spacing: 1.4px;
   color: var(--red);
 }
 
@@ -252,15 +270,16 @@ button {
 .card-title {
   font-size: 20px;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.28;
   color: var(--dark);
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
 }
 
 .card-excerpt {
   font-size: 14px;
+  font-weight: 400;
   color: var(--text);
-  line-height: 1.65;
+  line-height: 1.68;
   flex: 1;
 }
 
@@ -284,6 +303,7 @@ button {
   color: var(--red);
   white-space: nowrap;
   flex-shrink: 0;
+  letter-spacing: 0.2px;
 }
 
 /* ===========================
@@ -291,11 +311,11 @@ button {
 =========================== */
 .tag {
   font-size: 12px;
+  font-weight: 500;
   padding: 3px 10px;
   border-radius: 100px;
-  background: #f2f2f2;
-  color: var(--muted);
-  font-weight: 500;
+  background: rgba(255, 71, 20, 0.07);
+  color: var(--text);
 }
 
 /* ===========================
@@ -384,7 +404,7 @@ button {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.2px;
+  letter-spacing: 1.4px;
   color: var(--red);
 }
 
@@ -395,9 +415,9 @@ button {
 
 .modal-title {
   font-size: 30px;
-  font-weight: 800;
-  line-height: 1.25;
-  letter-spacing: -0.5px;
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: -0.8px;
   color: var(--dark);
   margin-bottom: 32px;
 }
@@ -434,7 +454,7 @@ button {
   font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 3px;
-  text-decoration-color: rgba(239, 51, 64, 0.4);
+  text-decoration-color: rgba(255, 71, 20, 0.4);
   transition: text-decoration-color 0.15s;
 }
 
@@ -585,18 +605,31 @@ button {
 }
 
 .feature-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
   color: var(--red);
 }
 
+.feature-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 2px;
+  background: var(--red);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
 .feature-title {
-  font-size: 42px;
-  font-weight: 800;
-  letter-spacing: -1px;
-  line-height: 1.15;
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  line-height: 1.12;
   color: var(--dark);
 }
 
@@ -619,7 +652,7 @@ button {
   font-size: 26px;
   font-weight: 700;
   color: var(--dark);
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
   margin: 0 0 20px;
 }
 
@@ -676,7 +709,7 @@ button {
     grid-template-columns: repeat(2, 1fr);
   }
   .hero-title {
-    font-size: 44px;
+    font-size: 52px;
   }
 }
 
@@ -685,11 +718,11 @@ button {
     grid-template-columns: 1fr;
   }
   .hero-title {
-    font-size: 34px;
-    letter-spacing: -1px;
+    font-size: 38px;
+    letter-spacing: -1.5px;
   }
   .hero-inner {
-    padding: 44px 20px 36px;
+    padding: 48px 20px 40px;
   }
   .grid-section {
     padding: 36px 20px 64px;
