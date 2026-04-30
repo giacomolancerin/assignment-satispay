@@ -20,6 +20,7 @@ CHROMA_DIR = PROJECT_ROOT / "chroma_db"
 # API
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_GEN_MODEL = "gemini-3.1-flash-lite-preview"
+GEMINI_GEN_MODEL_FALLBACK = "gemini-3-flash-preview"
 GEMINI_EMBED_MODEL = "gemini-embedding-001"
 EMBED_DIM = 768
 

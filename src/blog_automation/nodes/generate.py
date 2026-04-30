@@ -12,11 +12,15 @@ from ..state import Article, NodeError, PipelineState, Topic
 
 
 def _extract_markdown(text: str) -> str:
-    """Strip eventuali fence ```markdown ... ``` se Gemini li aggiunge."""
+    """Pulisci output LLM: strip code-fence wrap e preamboli prima del front-matter."""
     text = text.strip()
-    m = re.match(r"^```(?:markdown|md)?\n(.*?)\n```$", text, re.DOTALL)
+    m = re.match(r"^```(?:markdown|md|yaml)?\s*\n(.*?)\n```\s*$", text, re.DOTALL)
     if m:
-        return m.group(1).strip()
+        text = m.group(1).strip()
+    if not text.startswith("---"):
+        m2 = re.search(r"^---\s*$", text, re.MULTILINE)
+        if m2:
+            text = text[m2.start():].strip()
     return text
 
 
@@ -67,15 +71,7 @@ def _generate_one(topic: Topic, run_date: str) -> Article | None:
     )
     text = llm.generate_text(prompt=user, system=llm.ARTICLE_GENERATION_SYSTEM, temperature=0.85)
     md = _extract_markdown(text)
-
-    article = _parse_article(md, topic, run_date)
-    if article is None:
-        # 1 retry
-        print("[generate] retry...")
-        text2 = llm.generate_text(prompt=user, system=llm.ARTICLE_GENERATION_SYSTEM, temperature=0.85)
-        article = _parse_article(_extract_markdown(text2), topic, run_date)
-
-    return article
+    return _parse_article(md, topic, run_date)
 
 
 def _save_draft(article: Article, run_date: str) -> None:

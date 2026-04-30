@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import threading
+import time
+from typing import Callable, TypeVar
+
 from google import genai
 from google.genai import types
 
@@ -9,6 +13,49 @@ from . import config
 
 config.assert_api_key()
 _client = genai.Client(api_key=config.GEMINI_API_KEY)
+
+
+# ---------- Rate limiting + retry ----------
+# Modello primario: gemini-3.1-flash-lite-preview (15 RPM / 500 RPD free tier).
+# 5s tra chiamate ⇒ 12 RPM, sotto soglia.
+# Su 503/429: 2 retry a 30s e 60s; se esauriti, fallback al modello secondario.
+
+_MIN_INTERVAL_S = 5.0
+_RETRY_DELAYS_S = (30, 60)
+_last_call_t = 0.0
+_call_lock = threading.Lock()
+
+T = TypeVar("T")
+
+
+def _throttle() -> None:
+    global _last_call_t
+    with _call_lock:
+        elapsed = time.monotonic() - _last_call_t
+        if elapsed < _MIN_INTERVAL_S:
+            wait = _MIN_INTERVAL_S - elapsed
+            print(f"[llm] throttle: sleep {wait:.1f}s")
+            time.sleep(wait)
+        _last_call_t = time.monotonic()
+
+
+def _is_retryable(exc: Exception) -> bool:
+    msg = str(exc)
+    return any(s in msg for s in ("503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED"))
+
+
+def _call_with_retry(fn: Callable[[], T]) -> T:
+    for attempt in range(len(_RETRY_DELAYS_S) + 1):
+        _throttle()
+        try:
+            return fn()
+        except Exception as e:
+            if attempt == len(_RETRY_DELAYS_S) or not _is_retryable(e):
+                raise
+            delay = _RETRY_DELAYS_S[attempt]
+            print(f"[llm] {type(e).__name__}: {str(e)[:120]} — retry in {delay}s ({attempt+1}/{len(_RETRY_DELAYS_S)})")
+            time.sleep(delay)
+    raise RuntimeError("unreachable")
 
 
 # ---------- Prompts ----------
@@ -33,20 +80,33 @@ Sintesi della fonte: {summary}
 URL fonte: {url}
 Categoria: {category}
 
-Genera un articolo da blog (500-700 parole) in markdown con front-matter:
+Genera un articolo da blog in markdown con front-matter YAML.
 
-```yaml
+Vincoli OBBLIGATORI sul contenuto:
+- Body (escluso front-matter): 500-700 parole. Sotto 500 = output rifiutato.
+- Esattamente 1 H1 (riga `# Titolo`).
+- Almeno 2 sezioni H2 (righe `## ...`).
+- Title nel front-matter: 50-60 caratteri.
+
+Vincoli OBBLIGATORI sul formato di output:
+- L'output DEVE iniziare ESATTAMENTE con la riga `---` (apertura front-matter).
+- NESSUN testo prima del front-matter.
+- NESSUN code-fence ``` attorno all'output.
+- NESSUN testo dopo l'articolo.
+- YAML del front-matter deve essere parsabile: stringhe con `:` o virgolette interne vanno tra apici doppi.
+
+Schema front-matter (riproduci esattamente questi campi):
+
 ---
 title: "<titolo SEO 50-60 char>"
 slug: "<slug-url-friendly>"
 date: {date}
 category: {category}
-keywords: ["<5 keyword>"]
+keywords: ["<keyword 1>", "<keyword 2>", "<keyword 3>", "<keyword 4>", "<keyword 5>"]
 source_urls:
   - {url}
 satispay_angle: "<slug feature Satispay rilevante o 'none'>"
 ---
-```
 
 Possibili `satispay_angle`: pagamenti-tra-amici, salvadanaio, risparmio-smart,
 pagamenti-in-negozio, cashback, bollette-pagamenti, ricarica-telefonica,
@@ -99,18 +159,30 @@ def generate_text(
     system: str | None = None,
     temperature: float = 0.8,
 ) -> str:
-    """Genera testo con Gemini Flash. Ritorna la stringa di output."""
+    """Genera testo con il modello primario; fallback al secondario se i retry si esauriscono."""
     contents = [prompt]
     cfg = types.GenerateContentConfig(
         temperature=temperature,
         system_instruction=system,
     )
-    resp = _client.models.generate_content(
-        model=config.GEMINI_GEN_MODEL,
-        contents=contents,
-        config=cfg,
-    )
-    return resp.text or ""
+
+    def _do(model: str) -> Callable[[], str]:
+        def _inner() -> str:
+            resp = _client.models.generate_content(
+                model=model,
+                contents=contents,
+                config=cfg,
+            )
+            return resp.text or ""
+        return _inner
+
+    try:
+        return _call_with_retry(_do(config.GEMINI_GEN_MODEL))
+    except Exception as e:
+        if not _is_retryable(e) or not config.GEMINI_GEN_MODEL_FALLBACK:
+            raise
+        print(f"[llm] primary {config.GEMINI_GEN_MODEL} esaurito, fallback → {config.GEMINI_GEN_MODEL_FALLBACK}")
+        return _call_with_retry(_do(config.GEMINI_GEN_MODEL_FALLBACK))
 
 
 def embed_texts(
@@ -122,12 +194,16 @@ def embed_texts(
         task_type=task_type,
         output_dimensionality=config.EMBED_DIM,
     )
-    resp = _client.models.embed_content(
-        model=config.GEMINI_EMBED_MODEL,
-        contents=texts,
-        config=cfg,
-    )
-    return [list(e.values) for e in resp.embeddings]
+
+    def _do() -> list[list[float]]:
+        resp = _client.models.embed_content(
+            model=config.GEMINI_EMBED_MODEL,
+            contents=texts,
+            config=cfg,
+        )
+        return [list(e.values) for e in resp.embeddings]
+
+    return _call_with_retry(_do)
 
 
 def embed_query(text: str) -> list[float]:
