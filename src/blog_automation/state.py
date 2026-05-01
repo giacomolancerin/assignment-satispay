@@ -46,6 +46,7 @@ class Article(BaseModel):
     slug: str
     category: str
     body_md: str  # markdown del corpo (senza front-matter)
+    meta_description: str = ""
     keywords: list[str] = Field(default_factory=list)
     source_urls: list[str] = Field(default_factory=list)
     satispay_angle: str | None = None

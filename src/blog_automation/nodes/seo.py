@@ -33,12 +33,12 @@ def _check_headings(md: str) -> list[str]:
     return issues
 
 
-def _build_report(article: Article, post_meta: dict) -> SEOReport:
+def _build_report(article: Article) -> SEOReport:
     text = article.body_md
     word_count = len(text.split())
     keywords = _extract_keywords(text, top=5)
     primary = keywords[0] if keywords else (article.keywords[0] if article.keywords else "finanza")
-    meta_desc = post_meta.get("meta_description") or post_meta.get("seo", {}).get("meta_description") or ""
+    meta_desc = article.meta_description
     title_len = len(article.title)
     gulp = _gulpease(text)
 
@@ -68,30 +68,21 @@ def _build_report(article: Article, post_meta: dict) -> SEOReport:
 
 
 def _rewrite(article: Article, report: SEOReport) -> str:
+    # Passa front-matter + body al LLM per dare contesto completo
+    fm = f'---\ntitle: "{article.title}"\nmeta_description: "{article.meta_description}"\n---\n\n'
     prompt = llm.SEO_REWRITE.format(
         issues="\n".join(f"- {i}" for i in report.issues),
         primary_keyword=report.primary_keyword,
         keywords=", ".join(report.keywords),
-        article_md=article.body_md,
+        article_md=fm + article.body_md,
     )
     out = llm.generate_text(prompt=prompt, temperature=0.5)
-    out = re.sub(r"^```(?:markdown|md)?\n|\n```$", "", out.strip(), flags=re.MULTILINE).strip()
-    return out
+    return re.sub(r"^```(?:markdown|md)?\n|\n```$", "", out.strip(), flags=re.MULTILINE).strip()
 
 
 def _optimize_one(article: Article) -> Article:
     for iteration in range(config.SEO_MAX_ITERATIONS):
-        # Parse front-matter dal corpo (potrebbe contenerlo dopo rewrite LLM)
-        try:
-            post = frontmatter.loads(article.body_md)
-            body = post.content.strip() if post.content else article.body_md
-            meta = dict(post.metadata)
-        except Exception:
-            body = article.body_md
-            meta = {}
-
-        article.body_md = body  # strip front-matter per misurare solo il body
-        report = _build_report(article, meta)
+        report = _build_report(article)
         if report.passed:
             article.seo = report
             print(f"[seo] {article.slug}: passed iter={iteration}")
@@ -99,17 +90,17 @@ def _optimize_one(article: Article) -> Article:
 
         print(f"[seo] {article.slug}: iter {iteration} issues={len(report.issues)}")
         new_md = _rewrite(article, report)
-        # Estrai potenziale nuovo title/meta dal nuovo markdown
         try:
-            post2 = frontmatter.loads(new_md)
-            article.body_md = post2.content.strip() if post2.content else new_md
-            if post2.metadata.get("title"):
-                article.title = post2.metadata["title"]
+            post = frontmatter.loads(new_md)
+            article.body_md = post.content.strip() if post.content else new_md
+            if post.metadata.get("title"):
+                article.title = post.metadata["title"]
+            if post.metadata.get("meta_description"):
+                article.meta_description = post.metadata["meta_description"]
         except Exception:
             article.body_md = new_md
 
-    # Cap raggiunto: salva l'ultimo report
-    article.seo = _build_report(article, {})
+    article.seo = _build_report(article)
     return article
 
 

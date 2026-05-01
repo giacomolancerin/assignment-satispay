@@ -71,6 +71,11 @@ Regole di stile:
 - NIENTE frasi tipo "in questo articolo esploreremo" — vai dritto al punto
 - NIENTE pubblicità diretta a Satispay; l'angolatura è naturale ("una carta digitale", "un'app di pagamenti")
 
+Stile per leggibilità (indice Gulpease ≥ 60):
+- Frasi brevi: massimo 20 parole per frase; spezza le frasi più lunghe.
+- Voce attiva: scrivi "i tassi salgono", non "i tassi vengono aumentati".
+- Una idea per frase: evita subordinate annidate (no "che... che... che...").
+
 Output: SOLO markdown valido con front-matter YAML in cima. Nessun testo extra prima/dopo."""
 
 ARTICLE_GENERATION_USER = """Topic: {title}
@@ -83,7 +88,7 @@ Categoria: {category}
 Genera un articolo da blog in markdown con front-matter YAML.
 
 Vincoli OBBLIGATORI sul contenuto:
-- Body (escluso front-matter): 500-700 parole. Sotto 500 = output rifiutato.
+- Body (escluso front-matter): 550-700 parole. Sotto 500 = output rifiutato.
 - Esattamente 1 H1 (riga `# Titolo`).
 - Almeno 2 sezioni H2 (righe `## ...`).
 - Title nel front-matter: 50-60 caratteri.
@@ -102,6 +107,7 @@ title: "<titolo SEO 50-60 char>"
 slug: "<slug-url-friendly>"
 date: {date}
 category: {category}
+meta_description: "<descrizione SEO 140-160 char che include la keyword principale>"
 keywords: ["<keyword 1>", "<keyword 2>", "<keyword 3>", "<keyword 4>", "<keyword 5>"]
 source_urls:
   - {url}
@@ -137,19 +143,39 @@ Regole:
 
 Restituisci SOLO il markdown completo aggiornato (front-matter incluso)."""
 
-SEO_REWRITE = """Rivedi questo articolo per fixare i seguenti problemi SEO senza perdere naturalezza.
+SEO_REWRITE = """Rivedi questo articolo correggendo SOLO i problemi SEO elencati sotto.
+Non modificare nulla che non sia elencato.
 
-Problemi:
+Istruzioni per problema:
+
+- "meta_description mancante" o "meta_description length … fuori range":
+  → Nel front-matter scrivi/correggi il campo meta_description: testo di 140-160
+    caratteri che include la keyword principale "{primary_keyword}".
+
+- "Title length … fuori range":
+  → Nel front-matter riscrivi title tra 50 e 60 caratteri mantenendo le keyword.
+
+- "word_count … fuori range":
+  → Aggiungi o rimuovi testo dal body fino a rientrare nel range 500-700 parole.
+
+- "Gulpease … sotto soglia 60":
+  → Spezza ogni frase più lunga di 20 parole in due frasi più brevi.
+  → Converti le costruzioni passive in voce attiva ("viene aumentato" → "sale").
+  → Non cambiare heading H1/H2 né i link interni.
+
+- "H1 count" o "H2 count":
+  → Aggiungi o rimuovi heading rispettando: esattamente 1 H1, almeno 2 H2.
+
+Problemi da risolvere:
 {issues}
 
 Keyword principale: {primary_keyword}
 Keyword secondarie: {keywords}
 
-Articolo originale:
+Articolo (front-matter + body):
 {article_md}
 
-Restituisci SOLO il markdown completo aggiornato (front-matter incluso).
-Se serve, aggiungi/aggiorna `meta_description` nel front-matter (140-160 char)."""
+Restituisci SOLO il markdown aggiornato (front-matter incluso, senza code-fence)."""
 
 
 # ---------- API helpers ----------

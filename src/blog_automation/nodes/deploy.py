@@ -16,6 +16,7 @@ def _serialize(article: Article, run_date: str) -> str:
         "slug": article.slug,
         "date": run_date,
         "category": article.category,
+        "meta_description": article.meta_description,
         "keywords": article.keywords,
         "source_urls": article.source_urls,
         "satispay_angle": article.satispay_angle or "none",
