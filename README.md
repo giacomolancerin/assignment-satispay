@@ -60,7 +60,7 @@ uv run python -m blog_automation 2026-05-01    # data specifica
 
 ```
 src/blog_automation/
-├── __main__.py          # entrypoint CLI
+├── main.py              # entrypoint
 ├── graph.py             # definizione grafo LangGraph
 ├── state.py             # BlogState (TypedDict + Pydantic models)
 ├── config.py            # RSS_FEEDS, soglie SEO/RAG, paths
