@@ -1,8 +1,7 @@
 name: Daily blog pipeline
 
 on:
-  schedule:
-    - cron: '0 4 * * *'   # 06:00 CET (UTC+2 estate, UTC+1 inverno; piccolo drift accettabile)
+  # Paused: keep manual runs available, but disable the daily cron to avoid API usage.
   workflow_dispatch: {}
 
 permissions:

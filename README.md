@@ -88,9 +88,9 @@ chroma_db/                                 vector store (rebuild automatico se c
 
 ## Scheduling
 
-GitHub Actions cron `0 4 * * *` (06:00 CET) — vedi [`.github/workflows/daily-pipeline.yml`](.github/workflows/daily-pipeline.yml).
+Automazione giornaliera in pausa: il cron GitHub Actions `0 4 * * *` è disattivato per evitare consumo API mentre il case study è fermo.
 
-Trigger manuale disponibile via `workflow_dispatch`.
+Trigger manuale ancora disponibile via `workflow_dispatch` in [`.github/workflows/daily-pipeline.yml`](.github/workflows/daily-pipeline.yml).
 
 ---
 
